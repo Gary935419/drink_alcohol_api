@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Event;
+use Illuminate\Database\Events\StatementPrepared;
 use Laravel\Lumen\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -12,8 +14,17 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        \App\Events\ExampleEvent::class => [
-            \App\Listeners\ExampleListener::class,
-        ],
+        // \App\Events\ExampleEvent::class => [
+        //     \App\Listeners\ExampleListener::class,
+        // ],
     ];
+
+    public function boot()
+    {
+        parent::boot();
+
+        Event::listen(StatementPrepared::class, function ($event) {
+            $event->statement->setFetchMode(\PDO::FETCH_ASSOC);
+        });
+    }
 }
