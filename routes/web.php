@@ -16,3 +16,17 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+Route::group(['prefix' => 'v1'], function ($app) {
+    $app->get('version', function () {
+        return helper_test();
+    });
+    //用户登录
+    $app->post('member/login', 'v1\MemberController@member_login');
+    //用户注册
+    $app->post('member/register', 'v1\MemberController@member_register');
+    //用户登出
+    $app->post('member/logout', 'v1\MemberController@member_logout');
+    //发送验证码
+    $app->post('member/send_sms', 'v1\MemberController@member_send_sms');
+});
