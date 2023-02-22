@@ -23,17 +23,9 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
+
 $addAliases = [
     \Illuminate\Support\Facades\App::class => 'App',
-    \Illuminate\Support\Arr::class => 'Arr',
-    \Illuminate\Support\Facades\Config::class => 'Config',
-    \Illuminate\Support\Facades\Cookie::class => 'Cookie',
-    \Illuminate\Support\Facades\Request::class => 'Input',
-    \Illuminate\Support\Facades\Lang::class => 'Lang',
-    \Illuminate\Support\Facades\Redis::class => 'Redis',
-    \Illuminate\Support\Facades\Session::class => 'Session',
-    \App\Exceptions\OneException::class => 'OneException',
-    \Illuminate\Database\QueryException::class => 'QueryException',
 ];
 $app->withFacades(true, $addAliases);
 $app->withEloquent();
@@ -71,14 +63,6 @@ $app->singleton(
 */
 
 $app->configure('app');
-$app->configure('auth');
-$app->configure('const');
-$app->configure('database');
-$app->configure('logging');
-$app->configure('session');
-$app->configure(app()->environment() . '/config');
-$app->configure(app()->environment() . '/database');
-$app->configure(app()->environment() . '/logging');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -89,15 +73,20 @@ $app->configure(app()->environment() . '/logging');
 | route or middleware that'll be assigned to some specific routes.
 |
 */
+$app->singleton(
+    Illuminate\Contracts\Http\Kernel::class,
+    App\Http\Kernel::class
+);
 
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    App\Console\Kernel::class
+);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
-
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    App\Exceptions\Handler::class
+);
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
