@@ -1,22 +1,54 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Session;
 use Laravel\Lumen\Routing\Controller as BaseController;
+
 class Controller extends BaseController
 {
     public $OS;
     public $APP_VERSION;
     protected $VERSIONUP_MESSAGE;
     protected $MAINTENANCE_FLG = 0;   //0:不需要、1:需要
+
     public function __construct()
     {
         try {
+            //获取请求参数
+            $request_params = request()->post();
+            paramsCheck($request_params, array('APP_VERSION','OS','SIGN'));
+            $this->APP_VERSION = $request_params['APP_VERSION'];
+            $this->OS = $request_params['OS'];
+            $sign = $request_params['SIGN'];
+            // 参数非法check
+            if ($sign != $this->getSign($request_params)) {
+                throw new \OneException(3);
+            }
             // 最小版本check
             $this->check_app_version();
         } catch (\OneException $e) {
             $this->error($e->getMessage(), true);
+        } catch (\Exception $e) {
+            $this->error($e->getMessage() . chr(10) . $e->getTraceAsString(), true);
         }
     }
+
+    /**
+     * 获得签名认证
+     */
+    public function getSign($data = array())
+    {
+        ksort($data);
+        $str = "";
+        foreach ($data as $key => $value) {
+            if ($value != "" && $key != "SIGN") {
+                $str .= $value;
+            }
+        }
+        return md5($str);
+    }
+
     /**
      * app最小版本check
      */
@@ -44,15 +76,16 @@ class Controller extends BaseController
                 $STORE_NAME = config(app()->environment() . '/config.GOOGLE_PLAY_NAME');
             }
             $error_key = sprintf("errors.ERROR%04d", 1);
-            $lang_msg = trans($error_key,[],'ja');
+            $lang_msg = trans($error_key, [], 'ja');
             $this->VERSIONUP_MESSAGE = sprintf($lang_msg, $STORE_NAME);
-            $this->ok();
+            $this->ok(array(),true);
         }
     }
+
     /**
      * api正常情况下返回处理
      */
-    public function ok($DATA = null)
+    public function ok($DATA=null,$force=false)
     {
         $LOGIN_STATUS = 1;
         $MEMBER_ID = Session::get('mid');
@@ -75,6 +108,10 @@ class Controller extends BaseController
         if ($DATA != null) {
             $response = array_merge($DATA, $response);
         }
+        if ($force) {
+            echo json_encode($response);
+            exit();
+        }
 
         return $response;
     }
@@ -82,7 +119,7 @@ class Controller extends BaseController
     /**
      * api异常情况下返回处理
      */
-    public function error($MESSAGE)
+    public function error($MESSAGE,$force=false)
     {
         $LOGIN_STATUS = 1;
         $MEMBER_ID = Session::get('mid');
@@ -101,7 +138,12 @@ class Controller extends BaseController
         if ($MEMBER_ID != '') {
             $response['MEMBER_ID'] = $MEMBER_ID;
         }
+        if ($force) {
+            echo json_encode($response);
+            exit();
+        }
 
-        return $response;
+        return response()->json($response);
     }
+
 }

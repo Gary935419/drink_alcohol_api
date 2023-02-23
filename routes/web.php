@@ -28,5 +28,5 @@ Route::group(['prefix' => 'v1'], function ($app) {
     //用户登出
     $app->post('member/logout', 'v1\MemberController@member_logout');
     //发送验证码
-    $app->post('member/send_sms', 'v1\MemberController@member_send_sms');
+    $app->post('sms/send_sms', 'v1\SmsController@actionSendSms');
 });

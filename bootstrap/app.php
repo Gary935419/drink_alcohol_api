@@ -26,6 +26,7 @@ $app = new Laravel\Lumen\Application(
 
 $addAliases = [
     \Illuminate\Support\Facades\App::class => 'App',
+    \App\Exceptions\OneException::class => 'OneException',
 ];
 $app->withFacades(true, $addAliases);
 $app->withEloquent();
@@ -63,6 +64,11 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('auth');
+$app->configure('const');
+$app->configure('database');
+$app->configure('logging');
+$app->configure('session');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware

@@ -29,31 +29,14 @@ class OneException extends Exception
      * @param  array  $logs
      * @return void
      */
-    public function __construct($code = 0, $additional='', Exception $previous=null, $extensionData=array(), $logs = [])
+    public function __construct($code=0,$str='')
     {
-        // parent::__construct('The given data was invalid.');
-
-        $error_key = sprintf("errors.ERROR%04d", $code);
 		$formated_code = sprintf('%05d', $code);
-        $lang_msg = \Lang::get($error_key);
-
-        if (is_array($additional) && $additional) {
-			$lang_msg = vsprintf($lang_msg, $additional);
-		} elseif (!is_array($additional) && $additional != "") {
-			$lang_msg = sprintf($lang_msg, $additional);
-        }
-        
-        if ($logs){
-			$level = isset($logs['_type']) ? $logs['_type'] : 'debug';
-			unset($logs['_type']);
-			if(isset($_SERVER['REQUEST_URI'])) $logs['uri'] = $_SERVER['REQUEST_URI'];
-			\Log::$level('OneException_'.$formated_code.': '.json_encode($logs));
-		}
-        // $this->errorCode = $errorCode;
-        // $this->message = trans($errorCode, $args, 'ja');
+        $error_key = sprintf("errors.ERROR%04d", $code);
+        $lang_msg = trans($error_key,[],'ja');
         $this->errorCode = $error_key;
         $this->message = $lang_msg;
-        parent::__construct($lang_msg." (コード:{$formated_code})", $code, $previous);
+        parent::__construct($lang_msg.$str." (コード:{$formated_code})");
     }
 
     /**
