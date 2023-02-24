@@ -1,10 +1,6 @@
 <?php
-
-
 final class JSMS {
-
     const URL = 'https://api.sms.jpush.cn/v1/';
-
     private $appKey;
     private $masterSecret;
     private $options;

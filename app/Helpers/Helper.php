@@ -4,46 +4,7 @@ function helper_test()
 {
     echo("This is helper test!");
 }
-if (!function_exists('getRequestUserAgentInfo')) {
-    /**
-     * 在UA里获取APP_VERSION和OS信息
-     *
-     * @return array
-     */
-    function getRequestUserAgentInfo($userAgent) {
 
-        // 初期化
-        $OS = 'mini';
-        $APP_VERSION = '';
-
-        // OS情報取得
-        if (stripos($userAgent, 'android') !== false) {
-            $OS = 'android';
-        } elseif (stripos($userAgent, 'ios') !== false || stripos($userAgent, 'iphone') !== false) {
-            $OS = 'ios';
-        }
-
-        // APP_VERSION情報取得
-        $userAgentParts = preg_split("/\s|　/", $userAgent);
-        if ($OS == 'ios') {
-            if (isset($userAgentParts[1]) && preg_match("/^[0-9\.]+$/i", $userAgentParts[1])) {
-                $APP_VERSION = $userAgentParts[1];
-            } elseif (count($userAgentParts) >= 2 && preg_match("/^[0-9\.]+$/i", $userAgentParts[count($userAgentParts) - 2])) {
-                $APP_VERSION = $userAgentParts[count($userAgentParts) - 2];
-            }
-        } elseif ($OS == 'android') {
-            if (preg_match("/^[0-9\.]+$/i", $userAgentParts[count($userAgentParts) - 1])) {
-                $APP_VERSION = $userAgentParts[count($userAgentParts) - 1];
-            }
-        }
-
-        $result = array(
-            'OS' => $OS,
-            'APP_VERSION' => $APP_VERSION
-        );
-        return $result;
-    }
-}
 if (!function_exists('paramsCheck')) {
     /**
      * 必須チェック
@@ -75,5 +36,27 @@ if (!function_exists('hashPassword')) {
     function hashPassword($password)
     {
         return hash('sha256', config('auth.salt') . $password);
+    }
+}
+
+if (!function_exists('getRandomNumber')) {
+    /**
+     * Default password hash method
+     *
+     * @param string
+     * @return  string
+     */
+    function getRandomNumber($str_num)
+    {
+        $code = "";
+        for ($i = 0; $i < $str_num; $i++) {
+            if($i == 0){
+                $code .= rand(1, 9);
+            }
+            else{
+                $code .= rand(0, 9);
+            }
+        }
+        return $code;
     }
 }

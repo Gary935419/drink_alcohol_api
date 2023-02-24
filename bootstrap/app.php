@@ -65,10 +65,12 @@ $app->singleton(
 
 $app->configure('app');
 $app->configure('auth');
+$app->configure('config');
 $app->configure('const');
 $app->configure('database');
 $app->configure('logging');
 $app->configure('session');
+
 /*
 |--------------------------------------------------------------------------
 | Register Middleware

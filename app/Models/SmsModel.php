@@ -26,8 +26,32 @@ class SmsModel extends Model
         }
     }
 
+    public function select_mobile_code_effective($mobile)
+    {
+        try {
+            $code_info = DB::table('t_verification_code')
+                ->select('*')
+                ->where('is_use','=',0)
+                ->where('vctel','=',$mobile)
+                ->where('expired_time','>',time())
+                ->first();
+            return $code_info;
+        } catch(\Exception $e) {
+            throw $e;
+        }
+    }
+
     public function insert_mobile_code($insert_sms_arr)
     {
-        DB::table('t_verification_code')->insert($insert_sms_arr);
+       DB::table('t_verification_code')->insert($insert_sms_arr);
+    }
+
+    public function update_mobile_code($mobile)
+    {
+        DB::table('t_verification_code')
+            ->where('vctel', '=', $mobile)
+            ->update(array(
+                'is_use' => 1,
+            ));
     }
 }

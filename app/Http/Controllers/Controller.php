@@ -57,7 +57,7 @@ class Controller extends BaseController
         $os = $this->OS;
         $app_version = $this->APP_VERSION;
         $version_check = true;
-        $APP_VERSIONS = config(app()->environment() . '/config.APP_VERSION');
+        $APP_VERSIONS = config('config.APP_VERSION');
         if ($app_version != '') {
             if ($os == 'ios') {
                 if ($APP_VERSIONS['MIN_APP_VERSION_IOS'] > $app_version) {
@@ -71,9 +71,9 @@ class Controller extends BaseController
         }
         if (!$version_check) {
             $this->MAINTENANCE_FLG = 1;
-            $STORE_NAME = config(app()->environment() . '/config.APP_STORE_NAME');
+            $STORE_NAME = config('config.APP_STORE_NAME');
             if ($os == 'android') {
-                $STORE_NAME = config(app()->environment() . '/config.GOOGLE_PLAY_NAME');
+                $STORE_NAME = config('config.GOOGLE_PLAY_NAME');
             }
             $error_key = sprintf("errors.ERROR%04d", 1);
             $lang_msg = trans($error_key, [], 'ja');
@@ -146,4 +146,30 @@ class Controller extends BaseController
         return response()->json($response);
     }
 
+    public function createToken()
+    {
+        $randChar = $this->getRandChar(10);
+        $tokenStr = $randChar.time();
+        return sha1(bin2hex(openssl_random_pseudo_bytes(48)) . $tokenStr);
+    }
+    function getRandChar($length){
+        $str = '';
+        $strPol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+        $max = strlen($strPol)-1;
+        for($i=0;$i<$length;$i++){
+            //rand($min,$max)生成介于min和max两个数之间的一个随机整数
+            $str.=$strPol[rand(0,$max)];
+        }
+        return $str;
+    }
+
+    /**
+     * 初始化登录信息
+     */
+    public function clearAuth()
+    {
+        Session::remove('mid');
+        Session::remove('token');
+        Session::flush();
+    }
 }

@@ -13,6 +13,7 @@ return array(
      * Set this to null to have it automatically detected.
      */
     'base_url' => isset($_SERVER['BASE_URL']) ? $_SERVER['BASE_URL'] : '',
+
     // アプリのバージョンチェック 以下の数値より小さい場合は動かない
     'APP_VERSION' => array(
         'MIN_APP_VERSION_IOS' => '2.2.1',
@@ -23,6 +24,7 @@ return array(
     ),
     'APP_STORE_NAME' => 'App Store',
     'GOOGLE_PLAY_NAME' => 'Google Play',
+
     //极光推送配置
     'app_key' => '',
     'app_secret' => '',
