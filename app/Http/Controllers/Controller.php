@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MemberModel;
 use Illuminate\Support\Facades\Session;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
@@ -11,8 +10,9 @@ class Controller extends BaseController
     public $OS;
     public $MEMBER_INFO = array();
     public $APP_VERSION;
+    //强制版本更新
+    protected $FORCE_VERSION_UP_FLG_FLG = 0;   //0:不需要、1:需要
     protected $VERSIONUP_MESSAGE;
-    protected $MAINTENANCE_FLG = 0;   //0:不需要、1:需要
 
     public function __construct()
     {
@@ -52,7 +52,7 @@ class Controller extends BaseController
             }
         }
         if (!$version_check) {
-            $this->MAINTENANCE_FLG = 1;
+            $this->FORCE_VERSION_UP_FLG_FLG = 1;
             $STORE_NAME = config('config.APP_STORE_NAME');
             if ($os == 'android') {
                 $STORE_NAME = config('config.GOOGLE_PLAY_NAME');
@@ -70,13 +70,13 @@ class Controller extends BaseController
     public function ok($DATA=null,$force=false)
     {
         $LOGIN_STATUS = 1;
-        $MEMBER_ID = Session::get('mid');
+        $MEMBER_ID = Session::get('member_number');
         if ($MEMBER_ID != '') {
             $LOGIN_STATUS = 0;
         }
         $response = array(
             'STATUS' => 0,
-            'MAINTENANCE_FLG' => $this->MAINTENANCE_FLG,
+            'FORCE_VERSION_UP_FLG_FLG' => $this->FORCE_VERSION_UP_FLG_FLG,
             'LOGIN_STATUS' => $LOGIN_STATUS,
             'MEMBER_ID' => '',
             'MESSAGE' => '',
@@ -85,7 +85,7 @@ class Controller extends BaseController
         if ($MEMBER_ID != '') {
             $response['MEMBER_ID'] = $MEMBER_ID;
         }
-        if ($this->MAINTENANCE_FLG == 1) {
+        if ($this->FORCE_VERSION_UP_FLG_FLG == 1) {
             $response['MESSAGE'] = $this->VERSIONUP_MESSAGE;
         }
 
@@ -106,14 +106,14 @@ class Controller extends BaseController
     public function error($MESSAGE,$force=false)
     {
         $LOGIN_STATUS = 1;
-        $MEMBER_ID = Session::get('mid');
+        $MEMBER_ID = Session::get('member_number');
         if ($MEMBER_ID != '') {
             $LOGIN_STATUS = 0;
         }
 
         $response = array(
             'STATUS' => 1,
-            'MAINTENANCE_FLG' => $this->MAINTENANCE_FLG,
+            'FORCE_VERSION_UP_FLG_FLG' => $this->FORCE_VERSION_UP_FLG_FLG,
             'LOGIN_STATUS' => $LOGIN_STATUS,
             'MEMBER_ID' => '',
             'MESSAGE' => $MESSAGE,
@@ -131,59 +131,12 @@ class Controller extends BaseController
         return response()->json($response);
     }
 
-    public function createToken()
-    {
-        $randChar = $this->getRandChar(10);
-        $tokenStr = $randChar.time();
-        return sha1(bin2hex(openssl_random_pseudo_bytes(48)) . $tokenStr);
-    }
-    function getRandChar($length){
-        $str = '';
-        $strPol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
-        $max = strlen($strPol)-1;
-        for($i=0;$i<$length;$i++){
-            //rand($min,$max)生成介于min和max两个数之间的一个随机整数
-            $str.=$strPol[rand(0,$max)];
-        }
-        return $str;
-    }
-
     /**
      * 初始化登录信息
      */
     public function clearAuth()
     {
-        Session::remove('mid');
-        Session::remove('token');
+        Session::remove('member_number');
         Session::flush();
     }
-
-    /**
-     * 用户登录状态认证
-     */
-    public function authCheck($token)
-    {
-        try {
-            if (!$this->authByToken($token)) {
-                $this->clearAuth();
-                throw new \OneException(3);
-            }
-        } catch (\OneException $e) {
-            $this->error($e->getMessage(), true);
-        }
-    }
-
-    private function authByToken($token)
-    {
-        $MemberModel = new MemberModel($this);
-        $this->MEMBER_INFO = $MemberModel->select_member_by_token_info($token);
-        Session::put('mid', $this->MEMBER_INFO['mid']);
-        Session::put('token', $token);
-        if (!empty($this->MEMBER_INFO)) {
-            return true;
-        }else{
-            return false;
-        }
-    }
-
 }

@@ -23,4 +23,6 @@ Route::group(['prefix' => 'v1'], function ($app) {
     });
     //1-1-1 用户登录
     $app->post('member/login', 'v1\MemberController@actionMemberLogin');
+    //1-1-1 修改用户信息
+    $app->post('member/member_change_info', 'v1\MemberController@actionChangeMemberInfo');
 });
