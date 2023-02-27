@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MemberModel;
 use Illuminate\Support\Facades\Session;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
     public $OS;
+    public $MEMBER_INFO = array();
     public $APP_VERSION;
     protected $VERSIONUP_MESSAGE;
     protected $MAINTENANCE_FLG = 0;   //0:不需要、1:需要
@@ -17,14 +19,9 @@ class Controller extends BaseController
         try {
             //获取请求参数
             $request_params = request()->post();
-            paramsCheck($request_params, array('APP_VERSION','OS','SIGN'));
+            paramsCheck($request_params, array('APP_VERSION','OS'));
             $this->APP_VERSION = $request_params['APP_VERSION'];
             $this->OS = $request_params['OS'];
-            $sign = $request_params['SIGN'];
-            // 参数非法check
-            if ($sign != $this->getSign($request_params)) {
-                throw new \OneException(3);
-            }
             // 最小版本check
             $this->check_app_version();
         } catch (\OneException $e) {
@@ -32,21 +29,6 @@ class Controller extends BaseController
         } catch (\Exception $e) {
             $this->error($e->getMessage() . chr(10) . $e->getTraceAsString(), true);
         }
-    }
-
-    /**
-     * 获得签名认证
-     */
-    public function getSign($data = array())
-    {
-        ksort($data);
-        $str = "";
-        foreach ($data as $key => $value) {
-            if ($value != "" && $key != "SIGN") {
-                $str .= $value;
-            }
-        }
-        return md5($str);
     }
 
     /**
@@ -96,13 +78,15 @@ class Controller extends BaseController
             'STATUS' => 0,
             'MAINTENANCE_FLG' => $this->MAINTENANCE_FLG,
             'LOGIN_STATUS' => $LOGIN_STATUS,
+            'MEMBER_ID' => '',
+            'MESSAGE' => '',
             'SYSTEM_DATE' => date('Y-m-d H:i:s'),
         );
         if ($MEMBER_ID != '') {
             $response['MEMBER_ID'] = $MEMBER_ID;
         }
         if ($this->MAINTENANCE_FLG == 1) {
-            $response['MESSAGE_ARRAY'][] = array('MESSAGE' => $this->VERSIONUP_MESSAGE);
+            $response['MESSAGE'] = $this->VERSIONUP_MESSAGE;
         }
 
         if ($DATA != null) {
@@ -131,6 +115,7 @@ class Controller extends BaseController
             'STATUS' => 1,
             'MAINTENANCE_FLG' => $this->MAINTENANCE_FLG,
             'LOGIN_STATUS' => $LOGIN_STATUS,
+            'MEMBER_ID' => '',
             'MESSAGE' => $MESSAGE,
             'SYSTEM_DATE' => date('Y-m-d H:i:s'),
         );
@@ -172,4 +157,33 @@ class Controller extends BaseController
         Session::remove('token');
         Session::flush();
     }
+
+    /**
+     * 用户登录状态认证
+     */
+    public function authCheck($token)
+    {
+        try {
+            if (!$this->authByToken($token)) {
+                $this->clearAuth();
+                throw new \OneException(3);
+            }
+        } catch (\OneException $e) {
+            $this->error($e->getMessage(), true);
+        }
+    }
+
+    private function authByToken($token)
+    {
+        $MemberModel = new MemberModel($this);
+        $this->MEMBER_INFO = $MemberModel->select_member_by_token_info($token);
+        Session::put('mid', $this->MEMBER_INFO['mid']);
+        Session::put('token', $token);
+        if (!empty($this->MEMBER_INFO)) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 }

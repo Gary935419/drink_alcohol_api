@@ -26,19 +26,6 @@ if (!function_exists('paramsCheck')) {
     }
 }
 
-if (!function_exists('hashPassword')) {
-    /**
-     * Default password hash method
-     *
-     * @param string
-     * @return  string
-     */
-    function hashPassword($password)
-    {
-        return hash('sha256', config('auth.salt') . $password);
-    }
-}
-
 if (!function_exists('getRandomNumber')) {
     /**
      * Default password hash method

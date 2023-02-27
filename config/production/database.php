@@ -93,14 +93,14 @@ return [
         'cluster' => env('REDIS_CLUSTER', true),
         'default' => [
             'host' => env('REDIS_HOST', ''),
-            'password' => env('REDIS_PASSWORD', ''),
+            'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', 6379),
             'database' => env('REDIS_DB', 0),
             'read_write_timeout' => env('REDIS_READ_WRITE_TIMEOUT', 60),
         ],
         'cache' => [
             'host' => env('REDIS_HOST', ''),
-            'password' => env('REDIS_PASSWORD', ''),
+            'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', 6379),
             'database' => env('REDIS_CACHE_DB', 1),
             'read_write_timeout' => env('REDIS_READ_WRITE_TIMEOUT', 60),

@@ -24,8 +24,4 @@ return array(
     ),
     'APP_STORE_NAME' => 'App Store',
     'GOOGLE_PLAY_NAME' => 'Google Play',
-
-    //极光推送配置
-    'app_key' => '8a60da68d19c81159ecff9cc',
-    'app_secret' => '1172a716e85a8d7ad7497164',
 );

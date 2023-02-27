@@ -36,7 +36,7 @@ class OneException extends Exception
         $lang_msg = trans($error_key,[],'ja');
         $this->errorCode = $error_key;
         $this->message = $lang_msg;
-        parent::__construct($lang_msg.$str." (コード:{$formated_code})");
+        parent::__construct($lang_msg.$str." (CODE:{$formated_code})");
     }
 
     /**
