@@ -109,9 +109,9 @@ class MemberController extends Controller
             }
             $member_number = $paramsAll['member_number'];
 
-            //验证挡墙用户是否存在
-            $member_info = $MemberModel->select_member_info($member_number);
-            if (empty($member_info)){
+            //验证当前用户是否存在
+            $select_member_info = $MemberModel->select_member_info($member_number);
+            if (empty($select_member_info)){
                 throw new \OneException(8);
             }
 
@@ -148,6 +148,141 @@ class MemberController extends Controller
             $response = array();
             $response['DATA'] = $member_info;
             return response()->json(self::ok($response));
+        } catch (\OneException $e) {
+            DB::rollBack();
+            return $this->error($e->getMessage());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error($e->getMessage() . chr(10) . $e->getTraceAsString());
+        }
+    }
+
+    /**
+     *  1-1-3
+     * 获得饮酒测试履历
+     */
+    public function actionDrinkingHistory()
+    {
+        try {
+            $paramsAll = request()->all();
+
+            //model的初始化处理
+            $MemberModel = new MemberModel($this);
+
+            //用户标识id验证
+            if (!isset($paramsAll['member_number'])||empty($paramsAll['member_number'])) {
+                throw new \OneException(7);
+            }
+            $member_number = $paramsAll['member_number'];
+
+            //验证当前用户是否存在
+            $member_info = $MemberModel->select_member_info($member_number);
+            if (empty($member_info)){
+                throw new \OneException(8);
+            }
+
+            $select_drinking_history = $MemberModel->select_drinking_history($member_number);
+
+            $response = array();
+            $response['DATA'] = $select_drinking_history;
+            return response()->json(self::ok($response));
+        } catch (\OneException $e) {
+            return $this->error($e->getMessage());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage() . chr(10) . $e->getTraceAsString());
+        }
+    }
+
+    /**
+     *  1-1-4
+     * 获取用户信息
+     */
+    public function actionMemberInfo()
+    {
+        try {
+            $paramsAll = request()->all();
+
+            //model的初始化处理
+            $MemberModel = new MemberModel($this);
+
+            //用户标识id验证
+            if (!isset($paramsAll['member_number'])||empty($paramsAll['member_number'])) {
+                throw new \OneException(7);
+            }
+            $member_number = $paramsAll['member_number'];
+
+            //验证当前用户是否存在
+            $member_info = $MemberModel->select_member_info($member_number);
+            if (empty($member_info)){
+                throw new \OneException(8);
+            }
+
+            $response = array();
+            $response['DATA'] = $member_info;
+            return response()->json(self::ok($response));
+        } catch (\OneException $e) {
+            return $this->error($e->getMessage());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage() . chr(10) . $e->getTraceAsString());
+        }
+    }
+
+    /**
+     *  1-1-5
+     * 问题咨询反馈
+     */
+    public function actionConsultationFeedback()
+    {
+        try {
+            $paramsAll = request()->all();
+
+            //model的初始化处理
+            $MemberModel = new MemberModel($this);
+
+            //用户标识id验证
+            if (!isset($paramsAll['member_number'])||empty($paramsAll['member_number'])) {
+                throw new \OneException(7);
+            }
+            $member_number = $paramsAll['member_number'];
+
+            //验证当前用户是否存在
+            $member_info = $MemberModel->select_member_info($member_number);
+            if (empty($member_info)){
+                throw new \OneException(8);
+            }
+
+            //联系人姓名验证
+            if (!isset($paramsAll['contact_name'])||empty($paramsAll['contact_name'])) {
+                throw new \OneException(9);
+            }
+            $contact_name = $paramsAll['contact_name'];
+
+            //联系人邮箱验证
+            if (!isset($paramsAll['contact_email'])||empty($paramsAll['contact_email'])) {
+                throw new \OneException(10);
+            }
+            $contact_email = $paramsAll['contact_email'];
+
+            //咨询内容验证
+            if (!isset($paramsAll['consultation_content'])||empty($paramsAll['consultation_content'])) {
+                throw new \OneException(11);
+            }
+            $consultation_content = $paramsAll['consultation_content'];
+
+            //数据库事务处理
+            DB::beginTransaction();
+
+            $consultation_info = array();
+            $consultation_info['member_number'] = $member_number;
+            $consultation_info['contact_name'] = $contact_name;
+            $consultation_info['contact_email'] = $contact_email;
+            $consultation_info['consultation_content'] = $consultation_content;
+            $consultation_info['create_time'] = time();
+            $consultation_info['create_user'] = $member_number;
+            $MemberModel->insert_consultation($consultation_info);
+
+            DB::commit();
+            return response()->json(self::ok());
         } catch (\OneException $e) {
             DB::rollBack();
             return $this->error($e->getMessage());

@@ -34,4 +34,16 @@ class MemberModel extends Model
             ->update($modify_member_info);
     }
 
+    public function select_drinking_history($member_number)
+    {
+        $drinking_history = DB::table('drinking_history')
+            ->where('member_number','=',$member_number)
+            ->get()->toArray();
+        return $drinking_history;
+    }
+
+    public function insert_consultation($consultation_info)
+    {
+        DB::table('consultation')->insert($consultation_info);
+    }
 }
